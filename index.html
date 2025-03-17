@@ -31,12 +31,26 @@
         #scanArea {
             position: absolute;
             top: 40%;
-            left: 50%;
-            width: 20%;
+            left: 0;
+            width: 100%;
             height: 20%;
-            transform: translate(-50%, -50%);
-            border: 2px solid red;
-            background: rgba(0, 0, 0, 0);
+            border-top: 2px solid red;
+            border-bottom: 2px solid red;
+            background: rgba(0, 0, 0, 0); /* Ensure the scan area is fully visible */
+        }
+        #overlay::before, #overlay::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        #overlay::before {
+            top: 0;
+        }
+        #overlay::after {
+            bottom: 0;
         }
         #scanButton {
             background: #ff3b3b;
@@ -109,14 +123,12 @@
                 
                 const vw = video.videoWidth;
                 const vh = video.videoHeight;
-                const scanWidth = vw * 0.2;
                 const scanHeight = vh * 0.2;
-                const scanX = (vw - scanWidth) / 2;
                 const scanY = (vh - scanHeight) / 2;
 
-                canvas.width = scanWidth;
+                canvas.width = vw;
                 canvas.height = scanHeight;
-                ctx.drawImage(video, scanX, scanY, scanWidth, scanHeight, 0, 0, scanWidth, scanHeight);
+                ctx.drawImage(video, 0, scanY, vw, scanHeight, 0, 0, vw, scanHeight);
 
                 const imageData = canvas.toDataURL("image/png");
 
