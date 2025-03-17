@@ -36,7 +36,7 @@
             height: 20%;
             border-top: 2px solid red;
             border-bottom: 2px solid red;
-            background: rgba(0, 0, 0, 0); /* Ensure the scan area is fully visible */
+            background: rgba(0, 0, 0, 0);
         }
         #overlay::before, #overlay::after {
             content: "";
@@ -120,7 +120,7 @@
 
             scanInterval = setInterval(async () => {
                 if (!scanning) return;
-                
+
                 const vw = video.videoWidth;
                 const vh = video.videoHeight;
                 const scanHeight = vh * 0.2;
@@ -135,11 +135,20 @@
                 Tesseract.recognize(
                     imageData,
                     'eng',
-                    { logger: m => console.log(m) }
+                    {
+                        logger: m => console.log(m),
+                        tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+                    }
                 ).then(({ data: { text } }) => {
-                    outputText.innerText = text.trim() || "No text detected...";
+                    const filteredText = text.trim().split("\n").filter(line => 
+                        line.length >= 10 && /^[A-Z0-9]+$/.test(line)
+                    ).join("\n");
+
+                    if (filteredText) {
+                        outputText.innerText = filteredText;
+                    }
                 });
-            }, 2000);
+            }, 1000);  // Scan every second
         }
 
         scanButton.addEventListener("click", toggleScanning);
