@@ -3,33 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OCR Test</title>
+    <title>Live OCR Scanner</title>
 </head>
 <body>
-    <h2>Upload an Image to Extract Text</h2>
-    <input type="file" id="fileInput" accept="image/*">
-    <img id="preview" style="max-width: 300px; display: none;">
-    <p id="outputText"></p>
+    <h2>Live OCR Scanner</h2>
+    <video id="video" autoplay playsinline style="width: 100%; max-width: 400px;"></video>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <p><strong>Detected Text:</strong></p>
+    <p id="outputText">Scanning...</p>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.0.2/tesseract.min.js"></script>
     <script>
-        document.getElementById('fileInput').addEventListener('change', async function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const outputText = document.getElementById('outputText');
+        const ctx = canvas.getContext('2d');
 
-            const img = document.getElementById('preview');
-            img.src = URL.createObjectURL(file);
-            img.style.display = 'block';
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                video.srcObject = stream;
+                scanText();
+            } catch (err) {
+                console.error("Error accessing camera: ", err);
+                outputText.innerText = "Camera access denied.";
+            }
+        }
 
-            // Process image with Tesseract.js
-            const { data: { text } } = await Tesseract.recognize(
-                file,
-                'eng',
-                { logger: m => console.log(m) } // Logs progress to console
-            );
+        async function scanText() {
+            while (true) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            document.getElementById('outputText').innerText = `Extracted Text: ${text}`;
-        });
+                const imageData = canvas.toDataURL("image/png");
+
+                Tesseract.recognize(
+                    imageData,
+                    'eng',
+                    { logger: m => console.log(m) } // Logs progress
+                ).then(({ data: { text } }) => {
+                    outputText.innerText = text.trim() || "No text detected...";
+                });
+
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Scan every 2 seconds
+            }
+        }
+
+        startCamera();
     </script>
 </body>
 </html>
