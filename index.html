@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Test</title>
+</head>
+<body>
+    <h2>Upload an Image to Extract Text</h2>
+    <input type="file" id="fileInput" accept="image/*">
+    <img id="preview" style="max-width: 300px; display: none;">
+    <p id="outputText"></p>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.0.2/tesseract.min.js"></script>
+    <script>
+        document.getElementById('fileInput').addEventListener('change', async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const img = document.getElementById('preview');
+            img.src = URL.createObjectURL(file);
+            img.style.display = 'block';
+
+            // Process image with Tesseract.js
+            const { data: { text } } = await Tesseract.recognize(
+                file,
+                'eng',
+                { logger: m => console.log(m) } // Logs progress to console
+            );
+
+            document.getElementById('outputText').innerText = `Extracted Text: ${text}`;
+        });
+    </script>
+</body>
+</html>
