@@ -137,7 +137,9 @@
                     'eng',
                     {
                         logger: m => console.log(m),
-                        tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+                        tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", // Only Uppercase letters and numbers
+                        tessedit_pageseg_mode: 3, // Fully automatic segmentation
+                        oem: 1 // Using the LSTM OCR engine only
                     }
                 ).then(({ data: { text } }) => {
                     const filteredText = text.trim().split("\n").filter(line => 
